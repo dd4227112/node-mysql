@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes } = require('sequelize');
+const { DataTypes } = require('sequelize');
 module.exports = {
     id: {
         allowNull: false,
@@ -79,7 +79,14 @@ module.exports = {
             },
         }
     },
-
+    access_token: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    token_expire: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
     createdAt: {
         allowNull: false,
         type: DataTypes.DATE

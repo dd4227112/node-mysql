@@ -41,12 +41,12 @@ const SignUp = asyncErrorHanlder(async (req, res, next) => {
         confirmPassword: data.confirmPassword
 
     });
-    token = createToken(newUser);
+    const token = createToken(newUser);
 
     res.status(201).json({
         status: 'success',
         token,
-        user: cleanResult(newUser, 'password', 'createdAt', 'updatedAt', 'deletedAt'),
+        user: cleanResult(newUser, 'password', 'createdAt', 'updatedAt', 'deletedAt', 'token_expire', 'access_token'),
     });
 });
 
@@ -61,11 +61,11 @@ const signIn = asyncErrorHanlder(async (req, res, next) => {
 
     if (!userData || !(await bcrypt.compare(password, userData.password))) return next(new appError('Password or Email are incorrect!', 401));
 
-    token = createToken(userData);
+    const token = createToken(userData);
     res.status(200).json({
         status: 'success',
         token,
-        user: cleanResult(userData, 'password', 'createdAt', 'updatedAt', 'deletedAt'),
+        user: cleanResult(userData, 'password', 'createdAt', 'updatedAt', 'deletedAt', 'token_expire', 'access_token'),
     });
 });
 

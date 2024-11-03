@@ -1,37 +1,37 @@
 const user = require('../db/models/user');
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const asyncErrorHanlder = require('../Utils/asyncErrorHandler');
 const appError = require('../Utils/appError');
+const { createToken, cleanResult } = require('../Utils/helper');
+const sequelize = require('../config/database');
 
-const index = (req, res) => {
+const { QueryTypes, Op } = require('sequelize'); // call Sequelize class , Op == operators (==, !=, in, not in, <, > etc) Op.eq, Op.ne, Op.in, etc
+
+
+const getUsers = asyncErrorHanlder(async (req, res) => {
+    // const users = await user.findAll({
+    //     // attributes: [['id', 'user_id'], 'firstName', 'lastName', 'userType', 'email', 'createdAt'] // select id as user_id, firstName, lastName, userType, email, createdAt from users
+    //     attributes: {
+    //         exclude: ['password', 'deletedAt']
+    //     }
+    // });
+
+    const users = await sequelize.query('SELECT id, "firstName", "lastName", email,  case when "userType" = \'1\' then \'admin\' else \'user\' end as "role", "userType", "createdAt", "updatedAt" FROM users', {
+        type: QueryTypes.SELECT
+    })
     res.status(200).json({
         status: 'success',
-        message: 'SignUp page'
+        count: users.length,
+        data: {
+            users,
+        }
     });
-}
-const cleanResult = (data, ...columns) => {
-    // convert model object to javascript object
-    result = data.toJSON();
-    // remove some columns since we dont want to show them to user
-    columns.forEach((column) => {
-        delete result[column]
-    })
-    return result;
-}
+});
 
-const createToken = (userData) => {
-    const token = jwt.sign({ id: userData.id, email: userData.email }, process.env.JWT_SECRETE_KEY, { algorithm: process.env.JWT_ALGORITHM, expiresIn: process.env.TOKEN_EXPIRE });
-    return token;
-}
 const SignUp = asyncErrorHanlder(async (req, res, next) => {
     const data = req.body;
-    if (![1, 2].includes(data.userType)) {
-        return res.status(400).json({
-            status: 'fail',
-            message: 'Invalid User Types'
-        });
-    }
+    if (![1, 2].includes(data.userType)) return next(new appError('Invalid User Types', 400));
+
     const newUser = await user.create({
         firstName: data.firstName,
         lastName: data.lastName,
@@ -52,17 +52,15 @@ const SignUp = asyncErrorHanlder(async (req, res, next) => {
 
 const signIn = asyncErrorHanlder(async (req, res, next) => {
     const { email, password } = req.body;
-    if (!email || !password) {
-        return next(new appError('Password and Email are required!', 400));
-    }
+    if (!email || !password) return next(new appError('Password and Email are required!', 400));
+
     const userData = await user.findOne(
         {
             where: { email },
         });
 
-    if (!userData || !(await bcrypt.compare(password, userData.password))) {
-        return next(new appError('Password or Email are incorrect!', 401));
-    }
+    if (!userData || !(await bcrypt.compare(password, userData.password))) return next(new appError('Password or Email are incorrect!', 401));
+
     token = createToken(userData);
     res.status(200).json({
         status: 'success',
@@ -71,4 +69,4 @@ const signIn = asyncErrorHanlder(async (req, res, next) => {
     });
 });
 
-module.exports = { index, SignUp, signIn }
+module.exports = { getUsers, SignUp, signIn }

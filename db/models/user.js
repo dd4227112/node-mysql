@@ -3,6 +3,7 @@ const { Model, Sequelize, DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
 const sequelize = require('../../config/database');
 let table_structure = require('../table_structures/user_table_structure');
+const appError = require('../../Utils/appError');
 
 // modify table structe const
 
@@ -12,7 +13,7 @@ table_structure.confirmPassword = {
     if (value === this.password) {
       this.setDataValue('password', bcrypt.hashSync(value, 10))
     } else {
-      throw new Error('Password do not match')
+      throw new appError('Password do not match', 400)
     }
   }
 }

@@ -11,7 +11,7 @@ const prefix = process.env.PREFIX
 app.use(prefix + '/auth', authRoutes);
 
 app.use('*', (req, res, next) => {
-    return next(new appError(`Cant find ${req.originalUrl} on the server`, 400));
+    return next(new appError(`Cant find ${req.originalUrl} on the server`, 404));
 })
 app.use(errorController);
 

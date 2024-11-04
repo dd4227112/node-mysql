@@ -58,7 +58,7 @@ module.exports.getProjectById = asyncErrorHanlder(async (req, res, next) => {
 
 module.exports.updateProject = asyncErrorHanlder(async (req, res, next) => {
     const id = req.params.id;
-    const requiredProject = await project.findByPk(id, { include: user });
+    const requiredProject = await project.findByPk(id);
     if (!requiredProject) return next(new appError('Project Does not Exit', 404));
     const data = req.body;
 
@@ -82,7 +82,7 @@ module.exports.updateProject = asyncErrorHanlder(async (req, res, next) => {
 
 module.exports.deleteProject = asyncErrorHanlder(async (req, res, next) => {
     const id = req.params.id;
-    const requiredProject = await project.findByPk(id, { include: user });
+    const requiredProject = await project.findByPk(id);
     if (!requiredProject) return next(new appError('Project Does not Exit', 404));
 
     await requiredProject.destroy();

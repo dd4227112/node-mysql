@@ -7,6 +7,12 @@ module.exports = (error, req, res, next) => {
             message: `${error.errors[0].message}`,
 
         });
+    } else if (error.name === 'TokenExpiredError') {
+        res.status(403).json({
+            status: 'error',
+            message: `Session expired. Please login again`,
+
+        });
     }
     else if (process.env.APP_ENVIRONMENT === 'development') {
         devError(res, error);
